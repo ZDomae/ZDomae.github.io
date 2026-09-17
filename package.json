@@ -1,0 +1,28 @@
+{
+  "name": "knowledgebase",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs",
+    "docs:new:dev": "vuepress dev docs-new",
+    "docs:new:build": "vuepress build docs-new"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@vuepress/bundler-vite": "^2.0.0-rc.31",
+    "@vuepress/plugin-markdown-chart": "^2.0.0-rc.109",
+    "@vuepress/plugin-search": "^2.0.0-rc.134",
+    "@vuepress/theme-default": "^2.0.0-rc.134",
+    "mermaid": "^11.4.1",
+    "sass-embedded": "^1.104.0",
+    "vuepress": "^2.0.0-rc.31"
+  },
+  "dependencies": {
+    "vue": "^3.5.42"
+  }
+}
