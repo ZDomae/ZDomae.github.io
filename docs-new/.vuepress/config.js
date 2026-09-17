@@ -71,7 +71,6 @@ export default defineUserConfig({
           text: 'Copywriting',
           collapsible: false,
           children: [
-            { text: 'Facebook Ad', link: '/copywriting/facebook-ad' },
             { text: 'Email 1', link: '/copywriting/tornado' },
             { text: 'Email 2', link: '/copywriting/quake' },
           ],
