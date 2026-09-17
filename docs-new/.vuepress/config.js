@@ -18,7 +18,7 @@ export default defineUserConfig({
   ],
   theme: defaultTheme({
     lastUpdated: true,
-    contributors: true,
+    contributors: false,
     editLink: true,
     editLinkText: 'Suggest an edit on GitHub',
     navbar: [
