@@ -1,0 +1,5 @@
+:root { --vp-c-accent: #0ea5e9; }
+img { max-width:800px; width:100%; border:1px solid var(--vp-c-border); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+html[data-theme='dark'] { --vp-c-accent: #38bdf8; }
+html[data-theme='dark'] img { border-color: #334155; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+.vp-content table { display:block; overflow-x:auto; white-space:nowrap; }
