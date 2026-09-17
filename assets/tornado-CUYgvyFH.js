@@ -1,0 +1,1 @@
+var e=`/assets/tornado-BJowDXvF.png`;export{e as t};

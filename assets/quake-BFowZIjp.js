@@ -1,0 +1,1 @@
+var e=`/assets/quake-DaQ6a5vl.png`;export{e as t};

@@ -1,0 +1,1 @@
+var e=`/assets/facebook-DdGlIxM5.png`;export{e as t};

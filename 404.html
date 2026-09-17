@@ -1,25 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="author" content="John Doe" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;1,400;1,500&display=swap"
-      rel="stylesheet"
-    />
-    <title>React Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-V15ElOkX.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DfIBmhSq.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content="VuePress 2.0.0-rc.31" />
+    <style>
+      :root {
+        --vp-c-bg: #fff;
+      }
+
+      [data-theme='dark'] {
+        --vp-c-bg: #1b1b1f;
+      }
+
+      html,
+      body {
+        background-color: var(--vp-c-bg);
+      }
+    </style>
+    <script>
+      const useChoice = localStorage.getItem('vuepress-color-scheme')
+      const systemStatus =
+        'matchMedia' in window
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          : false
+
+      if (useChoice === 'light') {
+        document.documentElement.dataset.theme = 'light'
+      } else if (useChoice === 'dark' || systemStatus) {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+    <meta property="og:image" content="/knowledge-rag/overview.png"><link rel="icon" href="/knowledge-rag/overview.png"><title>Portfolio</title><meta name="description" content="Local documentation portfolio">
+    <link rel="preload" href="/assets/style-Bo5N4DvL.css" as="style"><link rel="stylesheet" href="/assets/style-Bo5N4DvL.css">
+    <link rel="modulepreload" href="/assets/app-BP3_1f6I.js"><link rel="modulepreload" href="/assets/404.html-CVvogeB0.js">
+    
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="app"><!--[--><div class="vp-theme-container" vp-container data-v-3fac1c72><main class="page" data-v-3fac1c72><div vp-content data-v-3fac1c72><h1 data-v-3fac1c72>404</h1><blockquote data-v-3fac1c72>There&#39;s nothing here.</blockquote><a class="route-link" href="/" data-v-3fac1c72>Take me home</a></div></main></div><!--[--><!----><!--]--><!--]--></div>
+    <script type="module" src="/assets/app-BP3_1f6I.js" defer></script>
   </body>
 </html>
