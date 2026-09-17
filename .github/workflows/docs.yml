@@ -3,6 +3,8 @@ on: {push: {branches: [main]}}
 jobs:
   docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -11,5 +13,5 @@ jobs:
       - run: npm run docs:new:build
       - uses: peaceiris/actions-gh-pages@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs-new/.vuepress/dist
