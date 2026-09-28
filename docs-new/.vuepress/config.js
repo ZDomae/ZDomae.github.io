@@ -25,6 +25,7 @@ export default defineUserConfig({
       { text: 'Knowledge Base (Documentation)', link: '/knowledge/' },
       { text: 'Knowledge Base (AI Agent RAG Version)', link: '/knowledge-rag/' },
       { text: 'AI Projects', link: '/ai-projects/' },
+      { text: 'Technical Content', link: '/technical-content/' },
       { text: 'Copywriting', link: '/copywriting/' },
       { text: 'SEO Guides', link: '/seo-guides/' },
       { text: 'News Articles', link: '/news-articles/' }
@@ -65,6 +66,15 @@ export default defineUserConfig({
             { text: 'Knowledge Base Agent', link: '/ai-projects/knowledge-base-agent' },
             { text: 'Technical Writing Agent', link: '/ai-projects/techwriting-agent' },
             { text: 'Sports Fantasy Lineup Agent', link: '/ai-projects/fantasy-agent' },
+          ],
+        },
+      ],
+      '/technical-content/': [
+        {
+          text: 'Technical Content',
+          collapsible: false,
+          children: [
+            { text: 'How to create an AI Agent', link: '/technical-content/agent-creation' },
           ],
         },
       ],
