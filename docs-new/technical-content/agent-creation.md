@@ -32,13 +32,13 @@ Since the knowledge bank of the AI agent will progressively increase, consider p
 2. Open the **Marketing** folder.
 3. Right-click in your folder and click **Text Document**.
 
-![](../agent-creation/media/text-doc.png)
+![](../technical-content/media/text-doc.png)
 
 4. Name the new document *SKILLS.md*.
 
 Make sure to remove the default name, and the file extension (*.TXT*). Once you do that and enter *SKILLS.md* as the new name, you will be prompted with the following message:
 
-![](../agent-creation/media/rename.png)
+![](../technical-content/media/rename.png)
 
 5. Click **Yes**.
 
@@ -54,7 +54,7 @@ Since we are making a simple marketing AI agent, let's, firstly, consider what t
 
 At this point, your *Marketing* folder should look something like this:
 
-![](../agent-creation/media/folder-structure.png)
+![](../technical-content/media/folder-structure.png)
 
 At the moment, the *references* and *resources* folders can be left empty. The *sub-skills* folder should have at least 1 *.md* file (e.g., *visualizer.md*).
 
@@ -70,16 +70,16 @@ For this example, let's prompt our AI agent to do the work for us.
 1. Open your AI desktop tool.
 2. If you are using **OpenCode**, click the **Add project** button.
 
-![](../agent-creation/media/open-folder.png)
+![](../technical-content/media/open-folder.png)
 
 3. Select your *Marketing* agent folder and click **Select folder**.
 4. Click the *...* button and click **New session**.
 
-![](../agent-creation/media/new-session.png)
+![](../technical-content/media/new-session.png)
 
 5. In the chat window, select **Plan**.
 
-![](../agent-creation/media/input.png)
+![](../technical-content/media/input.png)
 
 :::tip
 The **Plan** option allows the agent to plan its next steps before executing any actions. It's a good way to check how the agent understood your prompt.
