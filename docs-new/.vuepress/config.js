@@ -40,7 +40,6 @@ export default defineUserConfig({
             { text: 'Access Control', link: '/knowledge/access-control/permissions' },
             { text: 'Campaigns', link: '/knowledge/campaigns/campaigns' },
             { text: 'Data Import', link: '/knowledge/data-import/data-import' },
-            { text: 'How to create an AI agent', link: '/knowledge/agent-creation/agent-creation' }
           ],
         },
       ],
@@ -53,7 +52,6 @@ export default defineUserConfig({
             { text: 'Access Control', link: '/knowledge-rag/access-control/permissions' },
             { text: 'Campaigns', link: '/knowledge-rag/campaigns/campaigns' },
             { text: 'Data Import', link: '/knowledge-rag/data-import/data-import' },
-            { text: 'How to create an AI agent', link: '/knowledge/agent-creation/agent-creation' },
           ],
         },
       ],
