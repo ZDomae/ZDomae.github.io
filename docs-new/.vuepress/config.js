@@ -38,7 +38,8 @@ export default defineUserConfig({
           children: [
             { text: 'Overview', link: '/knowledge/overview/overview'},
             { text: 'Access Control', link: '/knowledge/access-control/permissions' },
-            { text: 'Campaigns', link: '/knowledge/campaigns/campaigns' },
+            { text: 'Component', link: '/knowledge/component/component' },
+            { text: 'Campaigns', link: '/knowledge-rag/campaigns/campaigns' },
             { text: 'Data Import', link: '/knowledge/data-import/data-import' },
           ],
         },
