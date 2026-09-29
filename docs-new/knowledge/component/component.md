@@ -1,6 +1,12 @@
 # FrameTask
 
-- [Component](#component)
+- [FrameTask](#frametask)
+  - [FrameTask capabilities](#frametask-capabilities)
+  - [FrameTask attributes](#frametask-attributes)
+  - [Column Template attributes](#column-template-attributes)
+  - [FrameTask Datastores](#frametask-datastores)
+    - [FrameTask properties when using Datastores](#frametask-properties-when-using-datastores)
+
 
 The `FrameTask` component acts as a replacement from the `SquareTask` component. It uses the latest default forms and alias concepts, and requires less or no configuration compared to the `TableTask` component. It can also link to workspaces when in read-only mode.
 
