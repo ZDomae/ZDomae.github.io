@@ -10,7 +10,6 @@
 
 The `FrameTask` component acts as a replacement from the `SquareTask` component. It uses the latest default forms and alias concepts, and requires less or no configuration compared to the `TableTask` component. It can also link to workspaces when in read-only mode.
 
-(screenshot of a random component with code)
 
 :::tip
 - Note that the `FrameTask` component is not a replacement for the `SquareTask` component.
@@ -91,7 +90,6 @@ The column templates for `FrameTask` can also be configured:
 </template>
 ```
 
-(mock screenshot of the code above)
 
 ## Column Template attributes
 
@@ -105,8 +103,6 @@ The column templates for `FrameTask` can also be configured:
 ## FrameTask Datastores
 
 The `FrameTask` component can use datastores, allowing you to include combined objects in the table and ensure control over your data domain.
-
-(mock screenshot of `FrameTask` code on the left, and a preview of the code on the right. Should look like a basic form).
 
 After you define the `source` property, the `FrameTask` component retrieves the data from the specified datastore.
 
