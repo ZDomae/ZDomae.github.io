@@ -1,6 +1,6 @@
 # Technical Writing Agent
 
-- The technical writing agent uses a RAG implementation that gives suggestions, examples, or written documents based only on resources retrieved from specific documents given to it: official IBM, RedHat, & Microsoft technical writing guidelines. Includes the Docling MCP chunking for better document quality.
+- The technical writing agent uses a RAG implementation that gives suggestions, examples, or written documents based only on resources retrieved from specific documents given to it: official IBM, RedHat, & Microsoft technical writing guidelines. Includes the Docling CLI chunking for better document quality.
 - Also has an integrated Dutch language only agent that uses professional technical writing terminology in NL. Is not invoked unless specifically instructed to do so.
 - Every claim is retrieved from a searchable library of style guides before writing, then checked against a quality gate.
 
