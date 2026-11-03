@@ -22,6 +22,7 @@ const left = ref(0)
 const question = ref('')
 const answer = ref('')
 const sources = ref<{ pagePath: string; headingId: string; title: string }[]>([])
+const sectionTitle = ref('')
 const loading = ref(false)
 const input = ref<HTMLInputElement | null>(null)
 
@@ -37,10 +38,33 @@ const dwellFor = (el: Element) => Math.min(MAX_DWELL, MIN_DWELL + (el.textConten
 
 function arm(el: Element) {
   timers.set(el, window.setTimeout(() => {
-    // Don't stack bubbles, and only count time while the tab is actually in view.
-    if (document.visibilityState !== 'visible' || visible.value) return arm(el)
+    // Only count time while the tab is actually in view.
+    if (document.visibilityState !== 'visible') return arm(el)
+    // Panel is open: hop it to whatever paragraph the reader has moved on to.
+    if (open.value) return retarget(el as HTMLElement)
+    // Don't stack bubbles.
+    if (visible.value) return arm(el)
     reveal(el as HTMLElement)
   }, dwellFor(el)))
+}
+
+function sectionOf(el: HTMLElement) {
+  const t = headingFor(el)?.textContent?.replace(/^#\s*/, '').trim() ?? ''
+  return t.length > 40 ? t.slice(0, 40).trimEnd() + '…' : t
+}
+
+function retarget(el: HTMLElement) {
+  if (el === target) return
+  // Never yank a response that is still streaming: retry after another dwell.
+  if (loading.value) return arm(el)
+  target = el
+  seen.add(el)
+  question.value = ''
+  answer.value = ''
+  sources.value = []
+  sectionTitle.value = sectionOf(el)
+  place()
+  visible.value = true
 }
 
 function reveal(el: HTMLElement) {
@@ -48,6 +72,7 @@ function reveal(el: HTMLElement) {
   seen.add(el)
   shown++
   target = el
+  sectionTitle.value = sectionOf(el)
   place()
   visible.value = true
 }
@@ -77,6 +102,7 @@ function teardown() {
   question.value = ''
   answer.value = ''
   sources.value = []
+  sectionTitle.value = ''
   target = null
 }
 
@@ -87,7 +113,7 @@ function setup() {
     for (const e of entries) {
       clearTimeout(timers.get(e.target))
       timers.delete(e.target)
-      if (e.intersectionRatio >= 0.6 && !seen.has(e.target)) arm(e.target)
+      if (e.intersectionRatio >= 0.6 && (!seen.has(e.target) || open.value)) arm(e.target)
     }
   }, { threshold: 0.6 })
   document.querySelectorAll<HTMLElement>(`${CONTENT} p, ${CONTENT} li`).forEach((el) => {
@@ -123,6 +149,7 @@ function close() {
   answer.value = ''
   sources.value = []
   question.value = ''
+  sectionTitle.value = ''
 }
 
 async function ask() {
@@ -186,7 +213,7 @@ watch(() => route.path, () => setTimeout(setup, 300))
         </button>
         <form v-else class="kb-ask__panel" @submit.prevent="ask">
           <div class="kb-ask__head">
-            <span>Ask about this section</span>
+            <span :title="sectionTitle || undefined">{{ sectionTitle ? `Ask about this section: ${sectionTitle}` : 'Ask about this section' }}</span>
             <button type="button" class="kb-ask__close" aria-label="Close" @click="close">×</button>
           </div>
           <div class="kb-ask__row">
@@ -220,8 +247,9 @@ watch(() => route.path, () => setTimeout(setup, 300))
   color: var(--c-text, #2c3e50); background: var(--c-bg, #fff);
   border: 1px solid var(--c-border, #eaecef); border-radius: 8px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
 }
-.kb-ask__head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 8px; }
-.kb-ask__close { border: 0; background: none; font-size: 18px; cursor: pointer; color: inherit; }
+.kb-ask__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 8px; }
+.kb-ask__head span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-ask__close { flex: none; border: 0; background: none; font-size: 18px; cursor: pointer; color: inherit; }
 .kb-ask__row { display: flex; gap: 6px; }
 .kb-ask__row input {
   flex: 1; min-width: 0; padding: 6px 8px; color: inherit; background: var(--c-bg-light, #f6f8fa);
