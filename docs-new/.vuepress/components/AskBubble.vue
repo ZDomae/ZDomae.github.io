@@ -2,7 +2,7 @@
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, useSiteData, withBase } from 'vuepress/client'
 
-const API_URL = 'http://localhost:8787/ask' // set to your deployed endpoint
+const API_URL = 'https://zdomae-github-io.onrender.com/ask' // set to your deployed endpoint
 const CONTENT = '.theme-default-content'
 const MIN_DWELL = 7000
 const MAX_DWELL = 10000
