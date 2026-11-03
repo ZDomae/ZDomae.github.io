@@ -1,0 +1,7 @@
+ANTHROPIC_API_KEY=YOUR_KEY
+EMBEDDINGS_KEY=YOUR_KEY
+EMBEDDINGS_URL=https://api.openai.com/v1
+EMBEDDINGS_MODEL=text-embedding-3-small
+ANSWER_MODEL=claude-sonnet-5-5
+MIN_PAGE_SCORE=0.35
+ALLOWED_ORIGINS=https://zdomae.github.io

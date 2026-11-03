@@ -7,7 +7,9 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "docs:new:dev": "vuepress dev docs-new",
-    "docs:new:build": "vuepress build docs-new"
+    "docs:new:build": "vuepress build docs-new",
+    "kb:index": "cd kb-ask && npm run index -- ../docs-new",
+    "kb:dev": "cd kb-ask && npm run dev"
   },
   "keywords": [],
   "author": "",
