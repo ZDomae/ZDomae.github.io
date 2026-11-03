@@ -5,3 +5,4 @@ docs/.vuepress/dist
 docs-new/.vuepress/.temp
 docs-new/.vuepress/.cache
 docs-new/.vuepress/dist
+kb-ask/.env

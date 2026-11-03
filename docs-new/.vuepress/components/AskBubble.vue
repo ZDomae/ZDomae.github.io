@@ -5,7 +5,7 @@ const mounted = ref(false)
 onMounted(() => { mounted.value = true })
 
 const API_URL = 'https://zdomae-github-io.onrender.com/ask' // set to your deployed endpoint
-const CONTENT = '.theme-default-content'
+const CONTENT = '[vp-content]'
 const MIN_DWELL = 7000
 const MAX_DWELL = 10000
 const MAX_PER_PAGE = 3
