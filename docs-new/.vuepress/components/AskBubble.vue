@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, useSiteData, withBase } from 'vuepress/client'
+const mounted = ref(false)
+onMounted(() => { mounted.value = true })
 
 const API_URL = 'https://zdomae-github-io.onrender.com/ask' // set to your deployed endpoint
 const CONTENT = '.theme-default-content'
@@ -176,7 +178,7 @@ watch(() => route.path, () => setTimeout(setup, 300))
 </script>
 
 <template>
-  <Teleport to="body">
+   <Teleport v-if="mounted" to="body">
     <Transition name="kb-ask-fade">
       <div v-if="visible" class="kb-ask" :style="{ top: top + 'px', left: left + 'px' }" @keydown.esc="close">
         <button v-if="!open" type="button" class="kb-ask__bubble" @click="openPanel">
