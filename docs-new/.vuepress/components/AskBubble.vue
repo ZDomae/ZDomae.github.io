@@ -11,6 +11,7 @@ const MAX_DWELL = 10000
 const MAX_PER_PAGE = 3
 const MIN_CHARS = 80
 const SNOOZE_MS = 60_000 // after an explicit dismiss, stay quiet for a minute
+const TYPING_GRACE_MS = 2500 // ignore retargets for this long after the last keystroke
 
 const route = useRoute()
 const router = useRouter()
@@ -33,6 +34,7 @@ let io: IntersectionObserver | null = null
 let shown = 0
 let raf = 0
 let snoozeUntil = 0
+let lastTypedAt = 0
 const timers = new Map<Element, number>()
 const seen = new WeakSet<Element>()
 
@@ -56,10 +58,17 @@ function sectionOf(el: HTMLElement) {
   return t.length > 40 ? t.slice(0, 40).trimEnd() + '…' : t
 }
 
+function markTyped() {
+  lastTypedAt = Date.now()
+}
+
 function retarget(el: HTMLElement) {
   if (el === target) return
   // Never yank a response that is still streaming: retry after another dwell.
   if (loading.value) return arm(el)
+  // Never yank the panel while the reader is composing a question: that would
+  // move the box and wipe the text they are typing. Retry once they are idle.
+  if (question.value.trim() || Date.now() - lastTypedAt < TYPING_GRACE_MS) return arm(el)
   target = el
   seen.add(el)
   question.value = ''
@@ -180,8 +189,13 @@ function headingFor(el: HTMLElement): HTMLElement | null {
 
 async function openPanel() {
   open.value = true
+  // Drop every dwell timer queued before the panel opened. Otherwise several
+  // visible paragraphs fire in quick succession and each one retargets the
+  // panel, making it hop around and clear whatever the reader has typed.
+  timers.forEach((t) => clearTimeout(t))
+  timers.clear()
   await nextTick()
-  place()
+  requestAnimationFrame(place) // measure the real panel, not the closed bubble
   input.value?.focus()
 }
 
@@ -265,7 +279,7 @@ watch(() => route.path, () => setTimeout(setup, 300))
             <button type="button" class="kb-ask__close" aria-label="Close" @click="close">×</button>
           </div>
           <div class="kb-ask__row">
-            <input ref="input" v-model="question" maxlength="500" placeholder="What's unclear?" />
+            <input ref="input" v-model="question" maxlength="500" placeholder="What's unclear?" @input="markTyped" />
             <button type="submit" :disabled="loading || !question.trim()">Ask</button>
           </div>
           <p v-if="loading && !answer" class="kb-ask__muted">Reading the docs…</p>
