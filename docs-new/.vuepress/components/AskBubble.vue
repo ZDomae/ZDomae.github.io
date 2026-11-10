@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter, useSiteData, withBase } from 'vuepress/client'
 const mounted = ref(false)
 onMounted(() => { mounted.value = true })
@@ -23,6 +23,10 @@ const top = ref(0)
 const left = ref(0)
 const question = ref('')
 const answer = ref('')
+// The answer is shown as plain text, so markdown emphasis markers would appear
+// as literal asterisks. Drop the ** pairs, plus a lone trailing * left over
+// when a marker is split across two streamed chunks.
+const answerText = computed(() => answer.value.replace(/\*\*/g, '').replace(/\*$/, ''))
 const sources = ref<{ pagePath: string; headingId: string; title: string }[]>([])
 const sectionTitle = ref('')
 const loading = ref(false)
@@ -283,7 +287,7 @@ watch(() => route.path, () => setTimeout(setup, 300))
             <button type="submit" :disabled="loading || !question.trim()">Ask</button>
           </div>
           <p v-if="loading && !answer" class="kb-ask__muted">Reading the docs…</p>
-          <div v-if="answer" class="kb-ask__answer" aria-live="polite">{{ answer }}</div>
+          <div v-if="answerText" class="kb-ask__answer" aria-live="polite">{{ answerText }}</div>
           <ul v-if="sources.length && !loading" class="kb-ask__sources">
             <li v-for="s in sources" :key="s.pagePath + s.headingId">
               <a :href="withBase(s.pagePath) + '#' + s.headingId" @click.prevent="go(s)">{{ s.title }}</a>
