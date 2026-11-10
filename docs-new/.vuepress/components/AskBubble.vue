@@ -10,6 +10,7 @@ const MIN_DWELL = 7000
 const MAX_DWELL = 10000
 const MAX_PER_PAGE = 3
 const MIN_CHARS = 80
+const SNOOZE_MS = 60_000 // after an explicit dismiss, stay quiet for a minute
 
 const route = useRoute()
 const router = useRouter()
@@ -25,11 +26,13 @@ const sources = ref<{ pagePath: string; headingId: string; title: string }[]>([]
 const sectionTitle = ref('')
 const loading = ref(false)
 const input = ref<HTMLInputElement | null>(null)
+const box = ref<HTMLElement | null>(null)
 
 let target: HTMLElement | null = null
 let io: IntersectionObserver | null = null
 let shown = 0
 let raf = 0
+let snoozeUntil = 0
 const timers = new Map<Element, number>()
 const seen = new WeakSet<Element>()
 
@@ -63,29 +66,67 @@ function retarget(el: HTMLElement) {
   answer.value = ''
   sources.value = []
   sectionTitle.value = sectionOf(el)
-  place()
   visible.value = true
+  nextTick(place)
 }
 
 function reveal(el: HTMLElement) {
+  if (Date.now() < snoozeUntil) return // reader dismissed it recently: stay quiet
   if (shown >= MAX_PER_PAGE) return
   seen.add(el)
   shown++
   target = el
   sectionTitle.value = sectionOf(el)
-  place()
   visible.value = true
+  nextTick(place)
 }
 
 function place() {
   if (!target) return
   const r = target.getBoundingClientRect()
-  if (r.bottom < 0 || r.top > window.innerHeight) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const M = 8 // keep clear of the viewport edge
+  const GAP = 12 // gap between the paragraph and the widget
+  const w = box.value?.offsetWidth || (open.value ? 340 : 172)
+  const h = box.value?.offsetHeight || 40
+
+  if (r.bottom < 0 || r.top > vh) {
     if (!open.value) visible.value = false // reader scrolled away: dismiss quietly
     return
   }
-  top.value = Math.max(8, r.top)
-  left.value = Math.min(r.right + 12, window.innerWidth - (open.value ? 340 : 172))
+
+  const clampY = (y: number) => Math.max(M, Math.min(y, vh - h - M))
+  const fitsX = (x: number) => x >= M && x + w <= vw - M
+
+  // Prefer the page margins beside the paragraph, then above/below it, so the
+  // widget never covers the text being read. Corner pin is the last resort.
+  const rightX = r.right + GAP
+  const leftX = r.left - w - GAP
+  const sideY = clampY(r.top)
+  if (fitsX(rightX)) {
+    left.value = rightX
+    top.value = sideY
+    return
+  }
+  if (fitsX(leftX)) {
+    left.value = leftX
+    top.value = sideY
+    return
+  }
+  const innerX = Math.max(M, Math.min(rightX, vw - w - M))
+  if (r.bottom + GAP + h <= vh - M) {
+    left.value = innerX
+    top.value = r.bottom + GAP
+    return
+  }
+  if (r.top - GAP - h >= M) {
+    left.value = innerX
+    top.value = r.top - GAP - h
+    return
+  }
+  left.value = vw - w - M
+  top.value = vh - h - M
 }
 
 const onScroll = () => {
@@ -109,6 +150,7 @@ function teardown() {
 function setup() {
   teardown()
   shown = 0
+  snoozeUntil = 0 // fresh page: a dismiss on the previous page doesn't carry over
   io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       clearTimeout(timers.get(e.target))
@@ -144,6 +186,9 @@ async function openPanel() {
 }
 
 function close() {
+  snoozeUntil = Date.now() + SNOOZE_MS
+  timers.forEach((t) => clearTimeout(t))
+  timers.clear()
   open.value = false
   visible.value = false
   answer.value = ''
@@ -207,10 +252,13 @@ watch(() => route.path, () => setTimeout(setup, 300))
 <template>
    <Teleport v-if="mounted" to="body">
     <Transition name="kb-ask-fade">
-      <div v-if="visible" class="kb-ask" :style="{ top: top + 'px', left: left + 'px' }" @keydown.esc="close">
-        <button v-if="!open" type="button" class="kb-ask__bubble" @click="openPanel">
-          Having trouble? Ask about this paragraph
-        </button>
+      <div v-if="visible" ref="box" class="kb-ask" :style="{ top: top + 'px', left: left + 'px' }" @keydown.esc="close">
+        <div v-if="!open" class="kb-ask__bubble-wrap">
+          <button type="button" class="kb-ask__bubble" @click="openPanel">
+            Having trouble? Ask about this paragraph
+          </button>
+          <button type="button" class="kb-ask__dismiss" aria-label="Dismiss" title="Dismiss" @click="close">×</button>
+        </div>
         <form v-else class="kb-ask__panel" @submit.prevent="ask">
           <div class="kb-ask__head">
             <span :title="sectionTitle || undefined">{{ sectionTitle ? `Ask about this section: ${sectionTitle}` : 'Ask about this section' }}</span>
@@ -235,15 +283,24 @@ watch(() => route.path, () => setTimeout(setup, 300))
 
 <style>
 .kb-ask { position: fixed; z-index: 50; font-size: 13px; line-height: 1.45; }
+.kb-ask__bubble-wrap { position: relative; }
 .kb-ask__bubble {
-  width: 160px; padding: 8px 10px; text-align: left; cursor: pointer;
+  width: 160px; padding: 8px 22px 8px 10px; text-align: left; cursor: pointer;
   color: var(--c-text, #2c3e50); background: var(--c-bg, #fff);
   border: 1px solid var(--c-border, #eaecef); border-left: 3px solid var(--c-brand, #3eaf7c);
   border-radius: 6px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  user-select: none;
 }
 .kb-ask__bubble:hover { border-color: var(--c-brand, #3eaf7c); }
+.kb-ask__dismiss {
+  position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; padding: 0;
+  display: grid; place-items: center; font-size: 13px; line-height: 1;
+  color: var(--c-text, #2c3e50); background: var(--c-bg, #fff);
+  border: 1px solid transparent; border-radius: 4px; cursor: pointer; opacity: 0.55;
+}
+.kb-ask__dismiss:hover { opacity: 1; border-color: var(--c-border, #eaecef); }
 .kb-ask__panel {
-  width: 320px; max-height: 70vh; overflow-y: auto; padding: 10px;
+  width: 320px; max-width: calc(100vw - 24px); max-height: 70vh; overflow-y: auto; padding: 10px;
   color: var(--c-text, #2c3e50); background: var(--c-bg, #fff);
   border: 1px solid var(--c-border, #eaecef); border-radius: 8px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
 }
