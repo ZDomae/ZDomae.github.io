@@ -26,7 +26,6 @@ export default defineUserConfig({
       { text: 'Knowledge Base (AI Agent RAG Version)', link: '/knowledge-rag/' },
       { text: 'AI Projects', link: '/ai-projects/' },
       { text: 'Technical Content', link: '/technical-content/' },
-      { text: 'Copywriting', link: '/copywriting/' },
       { text: 'SEO Guides', link: '/seo-guides/' },
       { text: 'News Articles', link: '/news-articles/' }
     ],
@@ -77,16 +76,6 @@ export default defineUserConfig({
           ],
         },
       ],
-      '/copywriting/': [
-        {
-          text: 'Copywriting',
-          collapsible: false,
-          children: [
-            { text: 'Email 1', link: '/copywriting/tornado' },
-            { text: 'Email 2', link: '/copywriting/quake' },
-          ],
-        },
-      ],
       '/seo-guides/': [
         {
           text: 'SEO Guides',
@@ -112,4 +101,8 @@ export default defineUserConfig({
   title: 'Portfolio',
   description: 'Local documentation portfolio',
   base: '/',
+  // The Copywriting section is hidden from the portfolio: dropping its pages
+  // here keeps them out of the build, the search index and the sitemap. The
+  // markdown stays in the repo, so restoring it is just removing this line.
+  pagePatterns: ['**/*.md', '!.vuepress', '!copywriting/**'],
 })
