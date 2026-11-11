@@ -8,16 +8,39 @@ const DOCS_DIR = path.resolve(process.argv[2] ?? 'docs')
 const OUT = path.resolve(process.argv[3] ?? 'index.json')
 const MAX_CHARS = 5000
 
-// Approximates VuePress heading slugs; verify against a few real headings.
-const slugify = (s: string) =>
-  s.trim().toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s+/g, '-')
+// Sections the site no longer builds. Keep in sync with `pagePatterns` in
+// docs-new/.vuepress/config.js, otherwise the index keeps chunks whose pages
+// 404 and the widget offers dead source links.
+const SKIP = (process.env.SKIP_DIRS ?? 'copywriting')
+  .split(',')
+  .map((s) => s.trim().replace(/^!|\/\*\*$/g, '').replace(/\/$/, ''))
+  .filter(Boolean)
 
-async function* walk(dir: string): AsyncGenerator<string> {
+// Must match VuePress exactly: anchors are copied verbatim from @mdit-vue/shared,
+// which is what the theme uses to generate heading ids. A near-miss here silently
+// produces links to the top of the page instead of the section.
+const rControl = /[\u0000-\u001f]/g
+const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'“”‘’<>,.?/]+/g
+const rCombining = /[\u0300-\u036F]/g
+const slugify = (s: string) =>
+  s
+    .normalize('NFKD')
+    .replace(rCombining, '')
+    .replace(rControl, '')
+    .replace(rSpecial, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/^(\d)/, '_$1')
+    .toLowerCase()
+
+async function* walk(dir: string, prefix = ''): AsyncGenerator<string> {
   for (const e of await readdir(dir, { withFileTypes: true })) {
     if (e.name.startsWith('.') || e.name === 'node_modules') continue // skips .vuepress
-    const p = path.join(dir, e.name)
-    if (e.isDirectory()) yield* walk(p)
-    else if (e.name.endsWith('.md')) yield p
+    const rel = prefix ? `${prefix}/${e.name}` : e.name
+    if (e.isDirectory()) {
+      if (SKIP.some((s) => rel === s || rel.startsWith(`${s}/`))) continue
+      yield* walk(path.join(dir, e.name), rel)
+    } else if (e.name.endsWith('.md')) yield path.join(dir, e.name)
   }
 }
 
