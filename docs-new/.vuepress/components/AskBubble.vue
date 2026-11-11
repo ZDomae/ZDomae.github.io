@@ -13,6 +13,7 @@ const MIN_CHARS = 80
 const SNOOZE_MS = 60_000 // after an explicit dismiss, stay quiet for a minute
 const TYPING_GRACE_MS = 2500 // ignore retargets for this long after the last keystroke
 const REQUEST_TIMEOUT_MS = 45_000 // Render free tier can cold-start for ~30s
+const MIN_SELECTION = 15 // shorter selections are usually a stray double-click
 
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +38,7 @@ const body = ref<HTMLElement | null>(null)
 const maxH = ref(0) // pixel cap so the panel never runs past the bottom edge
 const narrow = ref(false) // phones get a bottom sheet instead of a floating panel
 const contextText = ref('') // the paragraph the question is about
+const selectionText = ref('') // set when the reader highlighted something specific
 const copied = ref(false)
 
 let target: HTMLElement | null = null
@@ -72,9 +74,10 @@ function sectionOf(el: HTMLElement) {
 
 // Show which paragraph the panel is pointed at. Without it a retarget is
 // invisible: the title changes but the reader can't tell what is in scope.
-function setContext(el: HTMLElement) {
-  const t = (el.innerText ?? '').replace(/\s+/g, ' ').trim()
-  contextText.value = t.length > 120 ? t.slice(0, 120).trimEnd() + '…' : t
+// A highlighted selection wins over the paragraph, since it is more specific.
+function describeTarget(el: HTMLElement) {
+  const raw = (selectionText.value || el.innerText || '').replace(/\s+/g, ' ').trim()
+  contextText.value = raw.length > 120 ? raw.slice(0, 120).trimEnd() + '…' : raw
 }
 
 function markTyped() {
@@ -94,8 +97,9 @@ function retarget(el: HTMLElement) {
   answer.value = ''
   sources.value = []
   copied.value = false
+  selectionText.value = '' // a dwell retarget drops any earlier highlight
   sectionTitle.value = sectionOf(el)
-  setContext(el)
+  describeTarget(el)
   visible.value = true
   nextTick(place)
 }
@@ -106,10 +110,50 @@ function reveal(el: HTMLElement) {
   seen.add(el)
   shown++
   target = el
+  selectionText.value = ''
   sectionTitle.value = sectionOf(el)
-  setContext(el)
+  describeTarget(el)
   visible.value = true
   nextTick(place)
+}
+
+// A highlight inside the article is a deliberate act, so it outranks the dwell
+// timer, the per-page cap and an earlier dismiss. Selections anywhere else
+// (including inside the panel) are ignored.
+function readSelection() {
+  const sel = window.getSelection()
+  if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
+  const text = sel.toString().replace(/\s+/g, ' ').trim()
+  if (text.length < MIN_SELECTION) return
+
+  const node = sel.getRangeAt(0).startContainer
+  const host = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement
+  const el = host?.closest<HTMLElement>(`${CONTENT} p, ${CONTENT} li`)
+  if (!el) return
+
+  // Never disturb a question that is being typed or answered.
+  if (open.value && (loading.value || question.value.trim() || Date.now() - lastTypedAt < TYPING_GRACE_MS)) return
+
+  selectionText.value = text
+  target = el
+  seen.add(el)
+  sectionTitle.value = sectionOf(el)
+  describeTarget(el)
+  visible.value = true
+  if (!open.value) {
+    question.value = ''
+    answer.value = ''
+    sources.value = []
+    copied.value = false
+  }
+  nextTick(place)
+}
+
+// selectionchange fires on every drag frame, so settle before reading it.
+let selTimer = 0
+function onSelectionChange() {
+  window.clearTimeout(selTimer)
+  selTimer = window.setTimeout(readSelection, 250)
 }
 
 // Fixed page chrome the widget has to stay clear of: the navbar band along the
@@ -214,6 +258,7 @@ function teardown() {
   sources.value = []
   sectionTitle.value = ''
   contextText.value = ''
+  selectionText.value = ''
   copied.value = false
   target = null
 }
@@ -299,6 +344,7 @@ function close() {
   question.value = ''
   sectionTitle.value = ''
   contextText.value = ''
+  selectionText.value = ''
   copied.value = false
   if (hadFocus) focusBack()
 }
@@ -329,7 +375,9 @@ async function ask() {
         pagePath: stripBase(route.path),
         headingId: h?.id,
         headingTitle: h?.textContent?.replace(/^#\s*/, '').trim(),
-        paragraph: target.innerText.slice(0, 1500),
+        // A highlight is what the reader actually asked about; fall back to the
+        // whole paragraph when nothing is selected.
+        paragraph: (selectionText.value || target.innerText).slice(0, 1500),
       }),
     })
     if (!res.ok || !res.body) throw new Error(String(res.status))
@@ -396,11 +444,14 @@ onMounted(() => {
   setTimeout(setup, 300)
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onResize)
+  document.addEventListener('selectionchange', onSelectionChange)
 })
 onBeforeUnmount(() => {
   teardown()
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onResize)
+  document.removeEventListener('selectionchange', onSelectionChange)
+  window.clearTimeout(selTimer)
 })
 watch(() => route.path, () => setTimeout(setup, 300))
 </script>
@@ -418,7 +469,7 @@ watch(() => route.path, () => setTimeout(setup, 300))
       >
         <div v-if="!open" class="kb-ask__bubble-wrap">
           <button type="button" class="kb-ask__bubble" @click="openPanel">
-            Ask about this paragraph
+            {{ selectionText ? 'Ask about this selection' : 'Ask about this paragraph' }}
           </button>
           <button type="button" class="kb-ask__dismiss" aria-label="Dismiss" title="Dismiss" @click="close">×</button>
         </div>
